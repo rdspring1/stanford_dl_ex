@@ -1,4 +1,4 @@
-function [f,g] = linear_regression_vec(theta, X,y)
+function [f,g] = linear_regression_vec(theta, X, y)
   %
   % Arguments:
   %   theta - A vector containing the parameter values to optimize.
@@ -17,4 +17,6 @@ function [f,g] = linear_regression_vec(theta, X,y)
   %        using vectorized code.  (It will be just a few lines of code!)
   %        Store the objective function value in 'f', and the gradient in 'g'.
   %
-%%% YOUR CODE HERE %%%
+y_hat = theta' * X;
+f = 0.5 * sum((y_hat - y) .^ 2.0);
+g = X * (y_hat - y)';
