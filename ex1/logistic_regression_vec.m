@@ -1,4 +1,4 @@
-function [f,g] = logistic_regression_vec(theta, X,y)
+function [f,g] = logistic_regression_vec(theta, X, y)
   %
   % Arguments:
   %   theta - A column vector containing the parameter values to optimize.
@@ -18,4 +18,14 @@ function [f,g] = logistic_regression_vec(theta, X,y)
   %        using vectorized code.  (It will be just a few lines of code!)
   %        Store the objective function value in 'f', and the gradient in 'g'.
   %
-%%% YOUR CODE HERE %%%
+y_hat = theta' * X;
+sigmoid = @(x) 1/(1+exp(-x));
+h = arrayfun(sigmoid, y_hat);
+
+for i = 1:m
+  cost = y(i) * log(h(i)) + (1-y(i)) * log(1-h(i));
+  f = f + cost;
+end
+f = f * -1.0;
+
+g = X * (h - y)';

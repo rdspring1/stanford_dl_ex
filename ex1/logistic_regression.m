@@ -1,4 +1,4 @@
-function [f,g] = logistic_regression(theta, X,y)
+function [f,g] = logistic_regression(theta, X, y)
   %
   % Arguments:
   %   theta - A column vector containing the parameter values to optimize.
@@ -8,6 +8,7 @@ function [f,g] = logistic_regression(theta, X,y)
   %
 
   m=size(X,2);
+  n=size(X,1);
   
   % initialize objective value and gradient.
   f = 0;
@@ -18,7 +19,23 @@ function [f,g] = logistic_regression(theta, X,y)
   % TODO:  Compute the objective function by looping over the dataset and summing
   %        up the objective values for each example.  Store the result in 'f'.
   %
+  
+  for i = 1:m
+      weighted_sum = transpose(theta) * X(:,i);
+      hypothesis = 1 / (1 + exp(-weighted_sum));
+      cost = y(i) * log(hypothesis) + (1-y(i)) * log(1-hypothesis);
+      f = f + cost;
+  end
+  f = f * -1.0;
+  
   % TODO:  Compute the gradient of the objective by looping over the dataset and summing
   %        up the gradients (df/dtheta) for each example. Store the result in 'g'.
   %
-%%% YOUR CODE HERE %%%
+  
+  for j = 1:n
+     for i = 1:m
+        weighted_sum = transpose(theta) * X(:,i);
+        hypothesis = 1 / (1 + exp(-weighted_sum));
+        g(j) = g(j) + X(j,i) * (hypothesis - y(i));
+     end
+  end
