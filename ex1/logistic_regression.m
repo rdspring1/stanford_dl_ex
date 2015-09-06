@@ -19,11 +19,10 @@ function [f,g] = logistic_regression(theta, X, y)
   % TODO:  Compute the objective function by looping over the dataset and summing
   %        up the objective values for each example.  Store the result in 'f'.
   %
-  
+  weighted_sum = transpose(theta) * X;
+  hypothesis = 1 ./ (1 + exp(-weighted_sum));
   for i = 1:m
-      weighted_sum = transpose(theta) * X(:,i);
-      hypothesis = 1 / (1 + exp(-weighted_sum));
-      cost = y(i) * log(hypothesis) + (1-y(i)) * log(1-hypothesis);
+      cost = y(i) * log(hypothesis(i)) + (1-y(i)) * log(1-hypothesis(i));
       f = f + cost;
   end
   f = f * -1.0;
@@ -34,8 +33,6 @@ function [f,g] = logistic_regression(theta, X, y)
   
   for j = 1:n
      for i = 1:m
-        weighted_sum = transpose(theta) * X(:,i);
-        hypothesis = 1 / (1 + exp(-weighted_sum));
-        g(j) = g(j) + X(j,i) * (hypothesis - y(i));
+        g(j) = g(j) + X(j,i) * (hypothesis(i) - y(i));
      end
   end
