@@ -8,15 +8,16 @@ ei = [];
 
 % add common directory to your path for
 % minfunc and mnist data helpers
-addpath ../common;
-addpath(genpath('../common/minFunc_2012/minFunc'));
+addpath ../common
+addpath ../common/minFunc_2012/minFunc
+addpath ../common/minFunc_2012/minFunc/compiled
 
 %% load mnist data
 [data_train, labels_train, data_test, labels_test] = load_preprocess_mnist();
 
 %% populate ei with the network architecture to train
 % ei is a structure you can use to store hyperparameters of the network
-% the architecture specified below should produce  100% training accuracy
+% the architecture specified below should produce 100% training accuracy
 % You should be able to try different network architectures by changing ei
 % only (no changes to the objective function code)
 
@@ -39,20 +40,20 @@ params = stack2params(stack);
 %% setup minfunc options
 options = [];
 options.display = 'iter';
-options.maxFunEvals = 1e6;
+options.maxFunEvals = 1e4;
 options.Method = 'lbfgs';
 
 %% run training
 [opt_params,opt_value,exitflag,output] = minFunc(@supervised_dnn_cost,...
-    params,options,ei, data_train, labels_train);
+    params, options, ei, data_train, labels_train);
 
 %% compute accuracy on the test and train set
 [~, ~, pred] = supervised_dnn_cost( opt_params, ei, data_test, [], true);
 [~,pred] = max(pred);
-acc_test = mean(pred'==labels_test);
-fprintf('test accuracy: %f\n', acc_test);
+acc_test = mean(pred'==labels_test) * 100;
+fprintf('test accuracy: %2.1f%%\n', acc_test);
 
 [~, ~, pred] = supervised_dnn_cost( opt_params, ei, data_train, [], true);
 [~,pred] = max(pred);
-acc_train = mean(pred'==labels_train);
-fprintf('train accuracy: %f\n', acc_train);
+acc_train = mean(pred'==labels_train) * 100;
+fprintf('train accuracy: %2.1f%%\n', acc_train);
