@@ -6,6 +6,7 @@ function [ cost, grad, pred] = supervised_dnn_cost( theta, ei, data, labels, pre
  
 %% default values
 po = false;
+pred = [];
 if exist('pred_only','var')
   po = pred_only;
 end;
@@ -61,6 +62,3 @@ gradStack{1}.W = d2 * data';
 %% reshape gradients into vector
 [grad] = stack2params(gradStack);
 end
-
-
-

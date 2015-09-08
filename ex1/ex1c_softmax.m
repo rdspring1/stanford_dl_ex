@@ -41,6 +41,9 @@ theta(:)=minFunc(@softmax_regression_vec, theta(:), options, train.X, train.y);
 fprintf('Optimization took %f seconds.\n', toc);
 theta=[theta, zeros(n,1)]; % expand theta to include the last class.
 
+% check gradient
+average = grad_check(@softmax_regression_vec, theta(:), 10, train.X, train.y);
+
 % Print out training accuracy.
 tic;
 accuracy = multi_classifier_accuracy(theta,train.X,train.y);

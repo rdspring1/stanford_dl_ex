@@ -1,3 +1,4 @@
+% check gradient
 addpath ../common
 addpath ../common/minFunc_2012/minFunc
 addpath ../common/minFunc_2012/minFunc/compiled
@@ -24,6 +25,8 @@ options = struct('MaxIter', 100);
 
 % First, we initialize theta to some small random values.
 theta = rand(n,1)*0.001;
+
+average = grad_check(@logistic_regression_vec, theta, 10, train.X, train.y);
 
 % Call minFunc with the logistic_regression.m file as the objective function.
 %

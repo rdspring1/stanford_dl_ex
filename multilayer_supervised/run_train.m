@@ -43,9 +43,13 @@ options.display = 'iter';
 options.maxFunEvals = 1e4;
 options.Method = 'lbfgs';
 
+
 %% run training
 [opt_params,opt_value,exitflag,output] = minFunc(@supervised_dnn_cost,...
     params, options, ei, data_train, labels_train);
+
+%% check gradient
+average = grad_check(@supervised_dnn_cost, params, 10, ei, data_train, labels_train, false);
 
 %% compute accuracy on the test and train set
 [~, ~, pred] = supervised_dnn_cost( opt_params, ei, data_test, [], true);

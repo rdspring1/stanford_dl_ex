@@ -42,7 +42,6 @@ f = f * -1.0;
 
 %groundTruth = full(sparse(y, 1:m, 1));
 %groundTruth = groundTruth(1:num_classes-1,:);
-g = neg_norm_h * X';
-g = -1.0 * g';
+g = -1.0 .* (X * neg_norm_h');
 
 g=g(:); % make gradient a vector for minFunc
