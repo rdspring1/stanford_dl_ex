@@ -17,6 +17,13 @@ numHidden = numel(ei.layer_sizes) - 1;
 hAct = cell(numHidden+2, 1);
 gradStack = cell(numHidden+1, 1);
 
+%% L2 Regularization
+L2 = 0.0;
+for i = 1:numHidden+1
+   W_sqrd = stack{i}.W .^ 2.0;
+   L2 = L2 + sum(W_sqrd(:)); 
+end
+
 %% forward propagation
 %%% YOUR CODE HERE %%%
 hAct{1} = data;
@@ -26,7 +33,7 @@ for i = 1:numHidden
 end
 hAct(1,:) = [];
 
-weighted_sum = stack{numHidden+1}.W * hAct{numHidden};
+weighted_sum = bsxfun(@plus, stack{numHidden+1}.W * hAct{numHidden}, stack{numHidden+1}.b);
 hypothesis = exp(weighted_sum);
 hAct{numHidden+1} = bsxfun(@rdivide, hypothesis, sum(hypothesis));
 
@@ -47,7 +54,7 @@ for i = 1:m
        cost = cost + log(hAct{numHidden+1}(labels(i), i));
        neg_norm_y_hat(labels(i), i) = neg_norm_y_hat(labels(i), i) - 1;
 end
-cost = cost * -1.0;
+cost = cost * -1.0 + L2 * ei.lambda;
 
 %% compute gradients using back propagation
 %%% YOUR CODE HERE %%%
