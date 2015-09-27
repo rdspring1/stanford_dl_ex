@@ -22,8 +22,11 @@ numImages = 60000;    % number of images
 poolDim = 3;          % dimension of pooling region
 
 % Here we load MNIST training images
-addpath ../common/;
-images = loadMNISTImages('../common/train-images-idx3-ubyte');
+addpath ../common
+addpath ../common/minFunc_2012/minFunc
+addpath ../common/minFunc_2012/minFunc/compiled
+
+images = loadMNISTImages('train-images-idx3-ubyte');
 images = reshape(images,imageDim,imageDim,numImages);
 
 W = randn(filterDim,filterDim,numFilters);

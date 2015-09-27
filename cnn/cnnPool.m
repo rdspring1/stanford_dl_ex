@@ -29,7 +29,30 @@ pooledFeatures = zeros(convolvedDim / poolDim, ...
 %   
 %   Use mean pooling here.
 
-%%% YOUR CODE HERE %%%
+for imageNum = 1:numImages
+    for filterNum = 1:numFilters
+        poolImage = zeros(convolvedDim / poolDim, convolvedDim / poolDim);
+        
+        % Obtain the feature (filterDim x filterDim) needed during the convolution
+        filter = ones(poolDim, poolDim);
+
+        % Obtain the image
+        im = squeeze(convolvedFeatures(:, :, filterNum, imageNum));
+
+        % Convolve "filter" with "im", adding the result to convolvedImage
+        % be sure to do a 'valid' convolution
+        convolvedImage = convn(im, filter, 'valid');
+        
+        % subsampling and average
+        for row = 1:poolDim:size(convolvedImage,1)
+            for col = 1:poolDim:size(convolvedImage,2)
+                poolImage((row-1)/poolDim + 1, (col-1)/poolDim + 1) = convolvedImage(row, col) / (poolDim * poolDim);
+            end
+        end
+        
+        pooledFeatures(:, :, filterNum, imageNum) = poolImage;
+    end
+end
 
 end
 
