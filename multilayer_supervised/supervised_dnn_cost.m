@@ -54,7 +54,7 @@ for i = 1:m
        cost = cost + log(hAct{numHidden+1}(labels(i), i));
        neg_norm_y_hat(labels(i), i) = neg_norm_y_hat(labels(i), i) - 1;
 end
-cost = cost * -1.0 + L2 * ei.lambda;
+cost = -cost + L2 * ei.lambda;
 
 %% compute gradients using back propagation
 %%% YOUR CODE HERE %%%

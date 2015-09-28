@@ -7,7 +7,6 @@ function numgrad = computeNumericalGradient(J, theta)
 % Initialize numgrad with zeros
 numgrad = zeros(size(theta));
 
-%% ---------- YOUR CODE HERE --------------------------------------
 % Instructions: 
 % Implement numerical gradient checking, and return the result in numgrad.  
 % (See Section 2.3 of the lecture notes.)
@@ -33,9 +32,4 @@ for i =1:length(numgrad)
     end;
 end;
 
-
-
-
-
-%% ---------------------------------------------------------------
 end

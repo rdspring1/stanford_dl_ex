@@ -1,6 +1,6 @@
 function [cost, grad, preds] = cnnCost(theta,images,labels,numClasses,...
                                 filterDim,numFilters,poolDim,pred)
-% Calcualte cost and gradient for a single layer convolutional
+% Calculate cost and gradient for a single layer convolutional
 % neural network followed by a softmax layer with cross entropy
 % objective.
 %                            
@@ -72,6 +72,8 @@ activations = zeros(convDim,convDim,numFilters,numImages);
 activationsPooled = zeros(outputDim,outputDim,numFilters,numImages);
 
 %%% YOUR CODE HERE %%%
+activations = cnnConvolve(filterDim, numFilters, images, Wc, bc);
+activationsPooled = cnnPool(poolDim, activations);
 
 % Reshape activations into 2-d matrix, hiddenSize x numImages,
 % for Softmax layer
@@ -88,6 +90,9 @@ activationsPooled = reshape(activationsPooled,[],numImages);
 probs = zeros(numClasses,numImages);
 
 %%% YOUR CODE HERE %%%
+weighted_sum = bsxfun(@plus, Wd * activationsPooled, bd);
+hypothesis = exp(weighted_sum);
+probs = bsxfun(@rdivide, hypothesis, sum(hypothesis));
 
 %%======================================================================
 %% STEP 1b: Calculate Cost
@@ -98,6 +103,12 @@ probs = zeros(numClasses,numImages);
 cost = 0; % save objective into cost
 
 %%% YOUR CODE HERE %%%
+neg_norm_y_hat = probs;
+for i = 1:numImages
+       cost = cost + log(probs(labels(i), i));
+       neg_norm_y_hat(labels(i), i) = neg_norm_y_hat(labels(i), i) - 1;
+end
+cost = -cost;
 
 % Makes predictions given probs and returns without backproagating errors.
 if pred
@@ -118,6 +129,15 @@ end;
 %  quickly.
 
 %%% YOUR CODE HERE %%%
+deltaPooled = Wd' * neg_norm_y_hat;
+
+% Upsample the incoming error using kron
+deltaUpsampled = (1/poolDim^2) * kron(deltaPooled,ones(poolDim));
+deltaUpsampled = reshape(deltaUpsampled, convDim, convDim, numFilters, numImages);
+
+derivativeConvolutionActivation = activations ./ (1.0 + activations);
+deltaConvolution = deltaUpsampled .* derivativeConvolutionActivation;
+
 
 %%======================================================================
 %% STEP 1d: Gradient Calculation
@@ -128,6 +148,18 @@ end;
 %  for that filter with each image and aggregate over images.
 
 %%% YOUR CODE HERE %%%
+bd_grad = sum(neg_norm_y_hat, 2);
+Wd_grad = neg_norm_y_hat * activationsPooled';
+
+
+for imageNum = 1:numImages
+    for filterNum = 1:numFilters
+        filter = rot90(squeeze(deltaConvolution(:,:, filterNum, imageNum)),2);
+        im = squeeze(images(:, :, imageNum));
+        Wc_grad(:,:, filterNum) = Wc_grad(:,:, filterNum) + convn(im, filter, 'valid');
+        bc_grad(filterNum) = bc_grad(filterNum) + sum(sum(deltaConvolution(:,:, filterNum, imageNum)));
+    end
+end
 
 %% Unroll gradient into grad vector for minFunc
 grad = [Wc_grad(:) ; Wd_grad(:) ; bc_grad(:) ; bd_grad(:)];
