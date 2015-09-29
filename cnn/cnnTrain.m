@@ -42,7 +42,7 @@ theta = cnnInitParams(imageDim,filterDim,numFilters,poolDim,numClasses);
 %  calculation for your cnnCost.m function.  You may need to add the
 %  appropriate path or copy the file to this directory.
 
-DEBUG=true;  % set this to true to check gradient
+DEBUG=false;  % set this to true to check gradient
 if DEBUG
     % To speed up gradient checking, we will use a reduced network and
     % a debugging data set
@@ -54,7 +54,7 @@ if DEBUG
     db_theta = cnnInitParams(imageDim,db_filterDim,db_numFilters,...
                 db_poolDim,numClasses);
     
-    [cost grad] = cnnCost(db_theta,db_images,db_labels,numClasses,...
+    [cost, grad] = cnnCost(db_theta,db_images,db_labels,numClasses,...
                                 db_filterDim,db_numFilters,db_poolDim);
     
 
@@ -73,7 +73,6 @@ if DEBUG
  
     assert(diff < 1e-9,...
         'Difference too large. Check your gradient computation again');
-    
 end;
 
 %%======================================================================

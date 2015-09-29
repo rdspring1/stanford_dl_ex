@@ -130,14 +130,17 @@ end;
 
 %%% YOUR CODE HERE %%%
 deltaPooled = Wd' * neg_norm_y_hat;
+deltaPooled = reshape(deltaPooled, [], outputDim, numFilters, numImages);
 
 % Upsample the incoming error using kron
-deltaUpsampled = (1/poolDim^2) * kron(deltaPooled,ones(poolDim));
-deltaUpsampled = reshape(deltaUpsampled, convDim, convDim, numFilters, numImages);
-
-derivativeConvolutionActivation = activations ./ (1.0 + activations);
-deltaConvolution = deltaUpsampled .* derivativeConvolutionActivation;
-
+deltaUpsampled = zeros(convDim, convDim, numFilters, numImages);
+unpoolingFilter = ones(poolDim) / poolDim^2;
+for imageNum = 1:numImages
+    for filterNum = 1:numFilters
+        deltaUpsampled(:, :, filterNum, imageNum) = kron(deltaPooled(:, :, filterNum, imageNum), unpoolingFilter);
+    end
+end
+deltaConvolution = deltaUpsampled .* activations .* (1.0 - activations);
 
 %%======================================================================
 %% STEP 1d: Gradient Calculation
@@ -150,7 +153,6 @@ deltaConvolution = deltaUpsampled .* derivativeConvolutionActivation;
 %%% YOUR CODE HERE %%%
 bd_grad = sum(neg_norm_y_hat, 2);
 Wd_grad = neg_norm_y_hat * activationsPooled';
-
 
 for imageNum = 1:numImages
     for filterNum = 1:numFilters

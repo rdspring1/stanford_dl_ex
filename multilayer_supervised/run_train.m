@@ -37,8 +37,6 @@ ei.activation_fun = 'logistic';
 stack = initialize_weights(ei);
 params = stack2params(stack);
 
-sum(params)
-
 %% setup minfunc options
 options = [];
 options.display = 'iter';

@@ -61,7 +61,7 @@ cost = -cost + L2 * ei.lambda;
 gradStack{2}.b = sum(neg_norm_y_hat, 2) ./ m;
 gradStack{2}.W = neg_norm_y_hat * hAct{1}';
 
-dZ2 = hAct{1} ./ (1.0 + hAct{1});
+dZ2 = hAct{1} .* (1.0 - hAct{1});
 d2 = (stack{2}.W' * neg_norm_y_hat) .* dZ2;
 gradStack{1}.b = sum(d2, 2) ./ m;
 gradStack{1}.W = d2 * data';
