@@ -108,7 +108,7 @@ for i = 1:numImages
        cost = cost + log(probs(labels(i), i));
        neg_norm_y_hat(labels(i), i) = neg_norm_y_hat(labels(i), i) - 1;
 end
-cost = -cost;
+cost = -cost / numImages;
 
 % Makes predictions given probs and returns without backproagating errors.
 if pred
@@ -151,8 +151,8 @@ deltaConvolution = deltaUpsampled .* activations .* (1.0 - activations);
 %  for that filter with each image and aggregate over images.
 
 %%% YOUR CODE HERE %%%
-bd_grad = sum(neg_norm_y_hat, 2);
-Wd_grad = neg_norm_y_hat * activationsPooled';
+bd_grad = sum(neg_norm_y_hat, 2) ./ numImages;
+Wd_grad = neg_norm_y_hat * activationsPooled' ./ numImages;
 
 for imageNum = 1:numImages
     for filterNum = 1:numFilters
@@ -161,6 +161,11 @@ for imageNum = 1:numImages
         Wc_grad(:,:, filterNum) = Wc_grad(:,:, filterNum) + convn(im, filter, 'valid');
         bc_grad(filterNum) = bc_grad(filterNum) + sum(sum(deltaConvolution(:,:, filterNum, imageNum)));
     end
+end
+
+for filterNum = 1:numFilters
+   Wc_grad(:, :, filterNum) = Wc_grad(:, :, filterNum) ./ numImages;
+   bc_grad(filterNum) = bc_grad(filterNum) ./ numImages;
 end
 
 %% Unroll gradient into grad vector for minFunc
