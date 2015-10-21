@@ -39,7 +39,29 @@ for i = 1:size(stack{1}.W, 1)
     end
 end
 
+poolDim = 112;
 max_node = stack{1}.W(max_node, :);
 min_node = stack{1}.W(min_node, :);
-smin = sign(min_node);
-smax = sign(max_node);
+smin = sumLSH(poolDim, min_node);
+smax = sumLSH(poolDim, max_node);
+te = sumLSH(poolDim, example');
+
+smax = smax / norm(smax);
+smin = smin / norm(smin);
+te = te / norm(te);
+
+subplot(3,1,1);
+hist(te);
+subplot(3,1,2);
+hist(smin);
+subplot(3,1,3);
+hist(smax);
+
+mean(example)
+mean(min_node)
+mean(max_node)
+cosine_distance(te, smin)
+cosine_distance(te, smax)
+mean(te)
+mean(smin)
+mean(smax)
