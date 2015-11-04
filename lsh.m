@@ -17,51 +17,61 @@ ei.activation_fun = 'logistic';
 
 %% setup random initial weights
 stack = initialize_weights(ei);
-
+num_nodes = size(stack{1}.W, 1);
+num_points = 16;
 example = data_train(:,1);
-s_example = sign(example);
+%example = rand(28);
+%example = reshape(example, 784, 1);
+    
+poolDims = [4];
 
-max_dist = 0;
-min_dist = 2;
-max_node = -1;
-min_node = -1;
-for i = 1:size(stack{1}.W, 1)
-    dist = cosine_distance(stack{1}.W(i,:), example);
-    
-    if dist > max_dist
-        max_dist = dist;
-        max_node = i;
-    end
-    
-    if dist < min_dist
-        min_dist = dist;
-        min_node = i;
-    end
+X = zeros(num_points, 1);
+for idx = 1:num_points
+   X(idx) = idx; 
 end
 
-poolDim = 112;
-max_node = stack{1}.W(max_node, :);
-min_node = stack{1}.W(min_node, :);
-smin = sumLSH(poolDim, min_node);
-smax = sumLSH(poolDim, max_node);
-te = sumLSH(poolDim, example');
+for idx = 1:numel(poolDims)
+    poolDim = poolDims(idx);
+    cDim = ei.input_dim / poolDim;
+    permutation = randperm(ei.input_dim);
+    poolExample = interpolateLSH(poolDim, 28, example');
+    %poolExample = sumLSH(poolDim, example');
 
-smax = smax / norm(smax);
-smin = smin / norm(smin);
-te = te / norm(te);
+    dist = zeros(num_nodes, 1);
+    for i = 1:num_nodes
+        dist(i) = cosine_distance(stack{1}.W(i,:), example);
+    end
 
-subplot(3,1,1);
-hist(te);
-subplot(3,1,2);
-hist(smin);
-subplot(3,1,3);
-hist(smax);
+    [sorted_dist, sorted_idx] = sort(dist);
 
-mean(example)
-mean(min_node)
-mean(max_node)
-cosine_distance(te, smin)
-cosine_distance(te, smax)
-mean(te)
-mean(smin)
-mean(smax)
+    poolNodes = zeros(num_nodes, cDim);
+    for i = 1:num_nodes
+        poolNodes(i,:) = interpolateLSH(poolDim, 28, stack{1}.W(sorted_idx(i), :));
+        %poolNodes(i,:) = sumLSH(poolDim, stack{1}.W(sorted_idx(i), :));
+    end
+
+    poolDist = zeros(num_nodes, 1);
+    for i = 1:num_nodes
+       poolDist(i) = cosine_distance(poolNodes(i,:), poolExample);
+    end
+
+    y = zeros(num_points, 1);
+    poolDim = floor(numel(poolDist) / num_points);
+    for i = 1:num_points
+        start = (i-1) * poolDim+1;
+        y(i) = mean(poolDist(start:start+poolDim-1, 1));
+    end
+    plot(poolDist)
+    range(y)
+    range(poolDist)
+    range(dist)
+    figure;
+    plot(y)
+    
+    p = polyfit(X, y, 1)
+    yfit =  p(1) * X + p(2);
+    yresid = y - yfit;
+    SSresid = sum(yresid.^2);
+    SStotal = (length(y)-1) * var(y);
+    rsq = 1 - SSresid/SStotal
+end
