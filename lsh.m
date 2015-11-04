@@ -19,11 +19,11 @@ ei.activation_fun = 'logistic';
 stack = initialize_weights(ei);
 num_nodes = size(stack{1}.W, 1);
 num_points = 16;
-example = data_train(:,1);
-%example = rand(28);
-%example = reshape(example, 784, 1);
+%example = data_train(:,1);
+example = rand(28);
+example = reshape(example, 784, 1);
     
-poolDims = [4];
+poolDims = [3];
 
 X = zeros(num_points, 1);
 for idx = 1:num_points
@@ -32,9 +32,10 @@ end
 
 for idx = 1:numel(poolDims)
     poolDim = poolDims(idx);
-    cDim = ei.input_dim / poolDim;
+    %cDim = ei.input_dim / poolDim;
+    cDim = 36;
     permutation = randperm(ei.input_dim);
-    poolExample = interpolateLSH(poolDim, 28, example');
+    poolExample = interpolateLSH(0.2, 28, example');
     %poolExample = sumLSH(poolDim, example');
 
     dist = zeros(num_nodes, 1);
@@ -46,7 +47,7 @@ for idx = 1:numel(poolDims)
 
     poolNodes = zeros(num_nodes, cDim);
     for i = 1:num_nodes
-        poolNodes(i,:) = interpolateLSH(poolDim, 28, stack{1}.W(sorted_idx(i), :));
+        poolNodes(i,:) = interpolateLSH(0.2, 28, stack{1}.W(sorted_idx(i), :));
         %poolNodes(i,:) = sumLSH(poolDim, stack{1}.W(sorted_idx(i), :));
     end
 
@@ -61,6 +62,7 @@ for idx = 1:numel(poolDims)
         start = (i-1) * poolDim+1;
         y(i) = mean(poolDist(start:start+poolDim-1, 1));
     end
+    
     plot(poolDist)
     range(y)
     range(poolDist)
