@@ -26,7 +26,7 @@ ei.input_dim = 784;
 % number of output classes
 ei.output_dim = 10;
 % sizes of all hidden layers and the output layer
-ei.layer_sizes = [250, ei.output_dim];
+ei.layer_sizes = [500, 500, ei.output_dim];
 % scaling parameter for l2 weight regularization penalty
 ei.lambda = 1e-2;
 % which type of activation function to use in hidden layers
@@ -38,22 +38,21 @@ stack = initialize_weights(ei);
 params = stack2params(stack);
 
 %% setup minfunc options
-options = [];
-options.display = 'iter';
-options.maxFunEvals = 50;
-options.Method = 'lbfgs';
+options.epochs = 1;
+options.minibatch = 1;
+options.alpha = 1e-3;
+options.momentum = .95;
 
 %% run training
-[opt_params,opt_value,exitflag,output] = minFunc(@supervised_dnn_cost,...
-    params, options, ei, data_train, labels_train);
+opt_params = minFuncSGD(@(x,y,z) supervised_dnn_cost(x,y,z,ei,false),params,data_train,labels_train,options);
 
 %% compute accuracy on the test and train set
-[~, ~, pred] = supervised_dnn_cost( opt_params, ei, data_test, [], true);
+[~, ~, pred] = supervised_dnn_cost( opt_params, data_test, [], ei, true);
 [~,pred] = max(pred);
 acc_test = mean(pred'==labels_test) * 100;
 fprintf('test accuracy: %2.1f%%\n', acc_test);
 
-[~, ~, pred] = supervised_dnn_cost( opt_params, ei, data_train, [], true);
+[~, ~, pred] = supervised_dnn_cost( opt_params, data_train, [], ei, true);
 [~,pred] = max(pred);
 acc_train = mean(pred'==labels_train) * 100;
 fprintf('train accuracy: %2.1f%%\n', acc_train);

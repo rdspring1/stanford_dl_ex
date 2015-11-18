@@ -1,5 +1,4 @@
-function [opttheta] = minFuncSGD(funObj,theta,data,labels,...
-                        options)
+function [opttheta] = minFuncSGD(funObj,theta,data,labels,options)
 % Runs stochastic gradient descent with momentum to optimize the
 % parameters for the given objective.
 %
@@ -46,17 +45,17 @@ for e = 1:epochs
     % randomly permute indices of data for quick minibatch sampling
     rp = randperm(m);
     
+    % increase momentum after momIncrease iterations
+    if e == momIncrease
+        mom = options.momentum;
+    end;
+        
     for s=1:minibatch:(m-minibatch+1)
         it = it + 1;
 
-        % increase momentum after momIncrease iterations
-        if it == momIncrease
-            mom = options.momentum;
-        end;
-
         % get next randomly selected minibatch
-        mb_data = data(:,:,rp(s:s+minibatch-1));
-        mb_labels = labels(rp(s:s+minibatch-1));
+        mb_data = data(:,rp(s));
+        mb_labels = labels(rp(s));
 
         % evaluate the objective function on the next minibatch
         [cost, grad] = funObj(theta,mb_data,mb_labels);
@@ -65,14 +64,11 @@ for e = 1:epochs
         % gradient evaluated above scaled by the learning rate.
         % Then update the current weights theta according to the
         % sgd update rule
-        
-        %%% YOUR CODE HERE %%%
         velocity = mom * velocity + alpha * grad;
         theta = theta - velocity;
-        
-        fprintf('Epoch %d: Cost on iteration %d is %f\n',e,it,cost);
-    end;
+    end;        
 
+    fprintf('Epoch %d: Cost on iteration %d is %f\n',e,it,cost);
     % aneal learning rate by factor of two after each epoch
     alpha = alpha/2.0;
 
