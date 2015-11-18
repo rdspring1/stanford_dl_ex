@@ -16,20 +16,20 @@ stack = params2stack(theta, ei);
 numHidden = numel(ei.layer_sizes) - 1;
 hAct = cell(numHidden+2, 1);
 gradStack = cell(numHidden+1, 1);
-
-%% L2 Regularization
-L2 = 0.0;
-for i = 1:numHidden+1
-   W_sqrd = stack{i}.W .^ 2.0;
-   L2 = L2 + sum(W_sqrd(:)); 
-end
+sm = cell(numHidden, 1);
 
 %% forward propagation
 %%% YOUR CODE HERE %%%
 hAct{1} = data;
 for i = 1:numHidden
     Z = bsxfun(@plus, stack{i}.W * hAct{i}, stack{i}.b);
-    hAct{i+1} = 1 ./ (1 + exp(-Z));
+    mask = Z > 0;
+    hAct{i+1} = Z .* mask;
+    
+    sparsity = ei.layer_sizes(i) - 65;
+    [sorted_activations, ~] = sort(hAct{i+1});
+    sm{i} = sparsityMask(hAct{i+1}, size(Z), sparsity, sorted_activations);
+    hAct{i+1} = hAct{i+1} .* sm{i};
 end
 hAct(1,:) = [];
 
@@ -54,17 +54,18 @@ for i = 1:m
        cost = cost + log(hAct{numHidden+1}(labels(i), i));
        neg_norm_y_hat(labels(i), i) = neg_norm_y_hat(labels(i), i) - 1;
 end
-cost = -cost + L2 * ei.lambda;
+cost = -cost;
 
 %% compute gradients using back propagation
 %%% YOUR CODE HERE %%%
 gradStack{2}.b = sum(neg_norm_y_hat, 2) ./ m;
 gradStack{2}.W = neg_norm_y_hat * hAct{1}';
 
-dZ2 = hAct{1} .* (1.0 - hAct{1});
+dZ2 = hAct{1} > 0;
 d2 = (stack{2}.W' * neg_norm_y_hat) .* dZ2;
 gradStack{1}.b = sum(d2, 2) ./ m;
 gradStack{1}.W = d2 * data';
+gradStack{1}.W = gradStack{1}.W;
 
 %% reshape gradients into vector
 [grad] = stack2params(gradStack);
